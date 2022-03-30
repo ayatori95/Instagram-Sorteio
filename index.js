@@ -1,17 +1,39 @@
 const instaTouch = require('instatouch');
 require ('dotenv').config();
+const fs = require('fs');
 
-// Scrape comments from a post
-// For example from this post https://www.instagram.com/p/B7wOyffArc5/
-// In this example post id will be B7wOyffArc5 or you can set full URL
-(async () => {
+
+async function getAllParticipants() {
     try {
         const options = {
              count: 100,
-             sessionid: process.env.INSTAGRAM_SESSION_ID};
-        const comments = await instaTouch.comments('B7wOyffArc5', options);
-        console.log(comments);
+             session: process.env.INSTAGRAM_SESSION_ID
+            };
+        const comments = await instaTouch.comments('CbaaeyzgmCG', options);
+        return comments.collector;
     } catch (error) {
         console.log(error);
     }
-})();
+}
+
+function pickWinner(participants) {
+    const allParticipants = participants.length;
+    const pickedTicket = Math.floor(Math.random() * allParticipants);
+    const pickWinner = participants[pickedTicket];
+    return pickWinner;
+}
+
+function writeGoldenTicket(winner) {
+    fs.writeFile('goldenTicket.json', JSON.stringify(winner, null, 2), function(err) {
+        if (err) console.log(err);
+    })
+}
+
+async function main () {
+   const participants = await getAllParticipants ();
+   const goldenTicket =  pickWinner(participants);
+   writeGoldenTicket(goldenTicket);
+
+}
+
+main();
